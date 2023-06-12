@@ -44,6 +44,46 @@
             </div>
         </div>
 
+        <div>
+            <div>등록 지역</div>
+            <div th:each="region : ${regions}" class="form-check form-check-inline">
+                <input type="checkbox" th:field="*{regions}" th:value="${region.key}" class="form-check-input">
+                <!-- 위에 있는 regions 는 item.regions 임 -->
+                <!-- Map에 들어 있는 서울, 부산, 제주 key를 꺼내고 체크한 값이 Item 클래스에 있는
+                regions 리스트에 담기게 된다 -->
+                <label th:for="${#ids.prev('regions')}"
+                       th:text="${region.value}" class="form-check-label">서울</label>
+                <!-- region.value 로 value인 서울, 부산, 제주가 출력됨 -->
+                <!-- 반복을 돌기 때문에 id를 지정해주면 안됨  -->
+            </div>
+        </div>
+
+        <!-- radio button -->
+        <div>
+            <div>상품 종류</div>
+            <div th:each="type : ${itemTypes}" class="form-check form-check-inline">
+                <input type="radio" th:field="*{itemType}" th:value="${type.name()}" class="form-check-input">
+                <!-- ${type.name()} 으로 enum에 담겨 있는 name 가져옴 -->
+                <label th:for="${#ids.prev('itemType')}"
+                       th:text="${type.description}" class="form-check-label">
+                    <!-- ${type.description} 사용하려면 getter 필요함 프로퍼티 접근법이기 때문! -->
+                    BOOK
+                </label>
+            </div>
+        </div>
+
+        <!-- SELECT -->
+        <div>
+            <div>배송 방식</div>
+            <select th:field="*{deliveryCode}" class="form-select">
+                <option value="">== 배송 방식 선택 ==</option>
+                <option th:each="deliveryCode : ${deliveryCodes}" th:value="${deliveryCode.code}"
+                        th:text="${deliveryCode.displayName}">FAST</option>
+            </select>
+        </div>
+
+        <hr class="my-4">
+
         <div class="row">
             <div class="col">
                 <button class="w-100 btn btn-primary btn-lg" type="submit">상품 등록</button>
