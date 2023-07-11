@@ -11,6 +11,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -25,6 +27,14 @@ import java.util.Map;
 public class ValidationItemControllerV2 {
 
     private final ItemRepository itemRepository;
+    private final ItemValidator itemValidator;
+
+    @InitBinder
+    public void init(WebDataBinder dataBinder) {
+        dataBinder.addValidators(itemValidator);
+    }
+    // 이 Controller 가 요청될 때마다 WebDataBinder 가 호출 되고 거기에 dataBinder 가 만들어지고
+    // 그 안에 항상 Validator 를 넣어둬서 메서드마다 검증기가 불러와짐
 
     @GetMapping
     public String items(Model model) {
@@ -184,7 +194,7 @@ public class ValidationItemControllerV2 {
     }
 
 
-    @PostMapping("/add")
+    //@PostMapping("/add")
     public String addItemV4(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
 
         if (bindingResult.hasErrors()) {
@@ -240,6 +250,55 @@ public class ValidationItemControllerV2 {
         return "redirect:/validation/v2/items/{itemId}";
     }
 
+    //@PostMapping("/add")
+    public String addItemV5(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
+
+        itemValidator.validate(item, bindingResult);
+        // Validator 검증 로직 불러옴
+
+        if (bindingResult.hasErrors()) {
+            log.info("errors={} ", bindingResult);
+            return "validation/v2/addForm";
+        } // 바인딩에서 실패하면 typeMismatch 오류 메시지만 나오게 함
+
+        // 검증에 실패 하면 다시 입력 폼으로
+        if (bindingResult.hasErrors()) {
+            log.info("errors = {} ", bindingResult);
+            /*model.addAttribute("errors", errors); bindingResult 는 자동으로 model에 같이 넘어감 */
+            return "validation/v2/addForm";
+        }
+
+        //검증 성공 로직
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/validation/v2/items/{itemId}";
+    }
+
+    @PostMapping("/add")
+    public String addItemV6(@Validated @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
+
+        // @Validated 사용하여 내가 직접 검증기를 불러오지 않고
+        // 자동으로 검증기 돌아가게끔 함
+
+        if (bindingResult.hasErrors()) {
+            log.info("errors={} ", bindingResult);
+            return "validation/v2/addForm";
+        } // 바인딩에서 실패하면 typeMismatch 오류 메시지만 나오게 함
+
+        // 검증에 실패 하면 다시 입력 폼으로
+        if (bindingResult.hasErrors()) {
+            log.info("errors = {} ", bindingResult);
+            /*model.addAttribute("errors", errors); bindingResult 는 자동으로 model에 같이 넘어감 */
+            return "validation/v2/addForm";
+        }
+
+        //검증 성공 로직
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/validation/v2/items/{itemId}";
+    }
 
     @GetMapping("/{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
