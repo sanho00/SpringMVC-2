@@ -1,13 +1,13 @@
-package hello.thymeleaf;
+package hello.login;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ThymeleafBasicApplication {
+public class ItemServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ThymeleafBasicApplication.class, args);
+		SpringApplication.run(ItemServiceApplication.class, args);
 	}
 
 }
