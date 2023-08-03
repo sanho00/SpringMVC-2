@@ -1,11 +1,17 @@
 package hello.exception.servlet;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -33,6 +39,26 @@ public class ErrorPageController {
         printErrorInfo(request);
         return "error-page/500";
     }
+
+    @RequestMapping(value = "/error-page/500", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> errorPage500Api
+            (HttpServletRequest request, HttpServletResponse response) {
+        // 클라이언트가 보낸 acceptType이 application/json 이면 JSON 을 우선적으로 반환
+        log.info("API errorPage 500");
+
+        Map<String, Object> result = new HashMap<>();
+        // Jackson 라이브러리는 Map 을 JSON 구조로 변환 가능
+        // result 에 값 넣으면 JSON 으로 반환됨
+        Exception ex = (Exception) request.getAttribute(ERROR_EXCEPTION);
+        result.put("status", request.getAttribute(ERROR_STATUS_CODE));
+        result.put("message", ex.getMessage()); // 예외에서 받은 메시지
+
+        Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        // HTTP 상태 코드 받음
+        // ResponseEntity 는 HTTP 응답 Body 에 바로 데이터 쏜다
+        return new ResponseEntity<>(result, HttpStatus.valueOf(statusCode));
+    }
+
 
     private void printErrorInfo(HttpServletRequest request) {
         log.info("ERROR_EXCEPTION : {}", request.getAttribute(ERROR_EXCEPTION));
