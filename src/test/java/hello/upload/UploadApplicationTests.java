@@ -1,10 +1,10 @@
-package hello.exception;
+package hello.upload;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ExceptionApplicationTests {
+class UploadApplicationTests {
 
 	@Test
 	void contextLoads() {
